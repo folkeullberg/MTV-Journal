@@ -4,6 +4,8 @@ import json
 import os
 import uuid
 
+st.set_page_config(layout="wide")
+
 # File for persistent storage
 DATA_FILE = "journal_data.json"
 
@@ -50,20 +52,19 @@ if not st.session_state.logged_in:
     if st.button("Logga in", use_container_width=True):
         if password == "journal123":
             st.session_state.logged_in = True
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Fel lösenord")
 else:
-    # Full-screen Apple-like design with light colors
+    # Custom CSS for styling
     st.markdown("""
     <style>
-        .stApp { max-width: 100vw; margin: 0; padding: 0; background-color: #F2F2F7; }
-        .block-container { padding: 1rem; }
-        [data-testid="stSidebar"] { display: none !important; }
-        button { background-color: #007AFF; color: white; font-size: 18px; height: 50px; border-radius: 10px; border: none; }
-        button:hover { background-color: #0066CC; }
-        .stTextArea textarea { background-color: white; border-radius: 10px; font-size: 16px; border: 1px solid #CED3D9; }
-        .stExpander { border: none; background-color: transparent; }
+        .stApp { background-color: #F2F2F7; max-width: 100vw; margin: 0; padding: 0; }
+        div.stButton > button:first-child { background-color: #007AFF; color: white; border-radius: 10px; border: none; font-size: 18px; min-height: 50px; }
+        div.stButton > button:first-child:hover { background-color: #0066CC; }
+        .stTextArea > div > div > textarea { background-color: white; border-radius: 10px; border: 1px solid #CED3D9; font-size: 16px; min-height: 60vh; }
+        .stExpander { background-color: transparent; border: none; box-shadow: none; }
+        .selected-button { background-color: #34C759 !important; color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -80,7 +81,7 @@ else:
                         st.session_state.sections[new_category] = []
                         save_data(st.session_state.sections)
                         st.success("Tillagd!")
-                        st.experimental_rerun()
+                        st.rerun()
             else:
                 category = st.selectbox("", list(st.session_state.sections.keys()), label_visibility="collapsed")
                 new_phrase = st.text_input("", placeholder="Fras", label_visibility="collapsed")
@@ -89,13 +90,13 @@ else:
                         st.session_state.sections[category].append(new_phrase)
                         save_data(st.session_state.sections)
                         st.success("Tillagd!")
-                        st.experimental_rerun()
+                        st.rerun()
     with col_right_header:
         if st.button("Logga ut"):
             st.session_state.logged_in = False
             st.session_state.note = []
             st.session_state.selected_phrases = {}
-            st.experimental_rerun()
+            st.rerun()
 
     # Main layout: phrases (left), large note (center), categories (right)
     col_left, col_center, col_right = st.columns([2, 4, 1])
@@ -106,20 +107,20 @@ else:
             if st.button(section, key=f"sec_{section}", use_container_width=True):
                 st.session_state.current_section = section
                 st.session_state.selected_phrases = {}
-                st.experimental_rerun()
+                st.rerun()
 
     # Phrases (left, large buttons with green select)
     with col_left:
         phrases = st.session_state.sections[st.session_state.current_section]
         for phrase in phrases:
-            key = f"phrase_{phrase}_{uuid.uuid4()}"
+            phrase_key = f"phrase_{phrase}"
             selected = st.session_state.selected_phrases.get(phrase, False)
             if selected:
-                st.markdown(f"<style> div [data-testid=\"stButton\"] > button[key='{key}'] {{ background-color: #34C759; }}</style>", unsafe_allow_html=True)
-            if st.button(phrase, key=key, use_container_width=True):
+                st.markdown(f"<style>div.stButton > button[key='{phrase_key}'] {{ background-color: #34C759; }}</style>", unsafe_allow_html=True)
+            if st.button(phrase, key=phrase_key, use_container_width=True):
                 if not selected:
                     if phrase in ["Filtek Supreme XTE", "Filtek One", "Filtek Supreme"]:
-                        color = st.selectbox("", ["A1", "A2", "A3", "B1", "B2"], label_visibility="collapsed")
+                        color = st.selectbox("", ["A1", "A2", "A3", "B1", "B2"], label_visibility="collapsed", key=f"color_{phrase}")
                         st.session_state.note.append(f"{phrase}, färg {color}")
                     else:
                         st.session_state.note.append(phrase)
@@ -127,7 +128,7 @@ else:
                 else:
                     st.session_state.note = [p for p in st.session_state.note if not p.startswith(phrase)]
                     st.session_state.selected_phrases[phrase] = False
-                st.experimental_rerun()
+                st.rerun()
 
     # Large note area (center)
     with col_center:
@@ -142,4 +143,4 @@ else:
             if st.button("Rensa", use_container_width=True):
                 st.session_state.note = []
                 st.session_state.selected_phrases = {}
-                st.experimental_rerun()
+                st.rerun()
