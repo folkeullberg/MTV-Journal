@@ -42,77 +42,74 @@ if "current_section" not in st.session_state:
 if "selected_phrases" not in st.session_state:
     st.session_state.selected_phrases = {}
 
-# Login page
+# Welcoming login page
 if not st.session_state.logged_in:
-    st.title("MTV-JOURNAL - Logga in")
-    st.markdown("**Ange lösenord för att fortsätta**")
-    password = st.text_input("Lösenord", type="password", placeholder="Skriv journal123")
-    if st.button("Logga in", key="login_button", help="Klicka för att logga in"):
+    st.markdown("<h1 style='text-align: center;'>Välkommen till MTV-JOURNAL</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size: 20px;'>Snabb och enkel journalhantering för dig i sjukvården</p>", unsafe_allow_html=True)
+    password = st.text_input("", type="password", placeholder="Skriv ditt lösenord", label_visibility="collapsed")
+    if st.button("Logga in", use_container_width=True):
         if password == "journal123":
             st.session_state.logged_in = True
             st.rerun()
         else:
-            st.error("Fel lösenord! Försök igen.")
+            st.error("Fel lösenord. Försök igen.")
 else:
-    # Main app layout with columns
-    st.title("MTV-JOURNAL")
-    col1, col2 = st.columns([3, 1])  # Main content (left), sidebar (right)
-
-    # Logout button (top right)
-    with col2:
-        st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
-        if st.button("Logga ut", key="logout_button"):
+    # Full-screen layout
+    st.markdown("<style> section[data-testid='stSidebar'] { display: none !important; } .block-container { padding: 1rem; } .main { max-width: 100vw; } </style>", unsafe_allow_html=True)
+    
+    # Minimal header with discrete buttons
+    col_left_header, col_right_header = st.columns([1, 10])
+    with col_left_header:
+        admin_expander = st.expander("⚙️", expanded=False)
+        with admin_expander:
+            admin_action = st.radio("", ["Ny kategori", "Ny fras"])
+            if admin_action == "Ny kategori":
+                new_category = st.text_input("", placeholder="Kategorinamn", label_visibility="collapsed")
+                if st.button("Lägg till"):
+                    if new_category:
+                        st.session_state.sections[new_category] = []
+                        save_data(st.session_state.sections)
+                        st.success("Tillagd!")
+                        st.rerun()
+            else:
+                category = st.selectbox("", list(st.session_state.sections.keys()), label_visibility="collapsed")
+                new_phrase = st.text_input("", placeholder="Fras", label_visibility="collapsed")
+                if st.button("Lägg till"):
+                    if new_phrase:
+                        st.session_state.sections[category].append(new_phrase)
+                        save_data(st.session_state.sections)
+                        st.success("Tillagd!")
+                        st.rerun()
+    with col_right_header:
+        if st.button("Logga ut"):
             st.session_state.logged_in = False
             st.session_state.note = []
             st.session_state.selected_phrases = {}
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
-    # Admin settings (top left)
-    with col1:
-        with st.expander("⚙️ Admininställningar", expanded=False):
-            st.markdown("**Hantera kategorier och fraser**")
-            admin_action = st.radio("Välj åtgärd", ["Lägg till huvudkategori", "Lägg till fras"], key="admin_action")
-            if admin_action == "Lägg till huvudkategori":
-                new_category = st.text_input("Ny huvudkategori", placeholder="Skriv kategorinamn", key="new_category")
-                if st.button("Lägg till kategori", key="add_category"):
-                    if new_category and new_category not in st.session_state.sections:
-                        st.session_state.sections[new_category] = []
-                        save_data(st.session_state.sections)
-                        st.success(f"Kategori '{new_category}' tillagd!")
-                        st.rerun()
-            elif admin_action == "Lägg till fras":
-                category = st.selectbox("Välj kategori", list(st.session_state.sections.keys()), key="category_for_phrase")
-                new_phrase = st.text_input("Ny fras", placeholder="Skriv fras", key="new_phrase")
-                if st.button("Lägg till fras", key="add_phrase"):
-                    if new_phrase and new_phrase not in st.session_state.sections[category]:
-                        st.session_state.sections[category].append(new_phrase)
-                        save_data(st.session_state.sections)
-                        st.success(f"Fras '{new_phrase}' tillagd i '{category}'!")
-                        st.rerun()
-
-    # Sidebar with category list (right)
-    with col2:
-        st.markdown("**Välj kategori**")
+    # Main layout: Phrases (left), large note (center), categories (right)
+    col_left, col_center, col_right = st.columns([2, 4, 1])
+    
+    # Categories (right, simple list)
+    with col_right:
         for section in st.session_state.sections.keys():
-            if st.button(section, key=f"section_{section}_{uuid.uuid4()}", help=f"Välj {section}"):
+            if st.button(section, key=f"sec_{section}", use_container_width=True):
                 st.session_state.current_section = section
+                st.session_state.selected_phrases = {}
                 st.rerun()
 
-    # Main content: Phrases and note
-    with col1:
-        st.markdown(f"**Fraser för {st.session_state.current_section}**")
+    # Phrases (left, large buttons with green select)
+    with col_left:
         phrases = st.session_state.sections[st.session_state.current_section]
         for phrase in phrases:
-            # Initialize selected state for each phrase
-            if phrase not in st.session_state.selected_phrases:
-                st.session_state.selected_phrases[phrase] = False
-            # Button with green highlight if selected
-            button_style = "background-color: #90EE90;" if st.session_state.selected_phrases[phrase] else ""
-            if st.button(phrase, key=f"phrase_{phrase}_{uuid.uuid4()}", help=f"Lägg till {phrase}", use_container_width=True):
-                if not st.session_state.selected_phrases[phrase]:
+            key = f"phrase_{phrase}_{uuid.uuid4()}"
+            selected = st.session_state.selected_phrases.get(phrase, False)
+            button_style = "background-color: #4CAF50; color: white;" if selected else ""
+            st.markdown(f"<style>button[kind='secondary'][key='{key}'] {{ {button_style} font-size: 18px; height: 50px; }}</style>", unsafe_allow_html=True)
+            if st.button(phrase, key=key, use_container_width=True):
+                if not selected:
                     if phrase in ["Filtek Supreme XTE", "Filtek One", "Filtek Supreme"]:
-                        color = st.selectbox("Välj färg", ["A1", "A2", "A3", "B1", "B2"], key=f"color_{phrase}_{uuid.uuid4()}")
+                        color = st.selectbox("", ["A1", "A2", "A3", "B1", "B2"], label_visibility="collapsed")
                         st.session_state.note.append(f"{phrase}, färg {color}")
                     else:
                         st.session_state.note.append(phrase)
@@ -122,18 +119,17 @@ else:
                     st.session_state.selected_phrases[phrase] = False
                 st.rerun()
 
-    # Live note display and copy button (right)
-    with col2:
-        st.markdown("**Din anteckning**")
-        if st.session_state.note:
-            note_text = f"{st.session_state.current_section}:\n" + "\n".join(st.session_state.note)
-            st.text_area("Kopiera denna text:", note_text, height=200, key="note_area")
-            if st.button("Kopiera anteckning", key="copy_button", help="Kopiera texten till urklipp"):
-                st.write("<script>navigator.clipboard.writeText(document.getElementById('note_area').value)</script>", unsafe_allow_html=True)
-                st.success("Text kopierad!")
-        else:
-            st.text_area("Kopiera denna text:", "Ingen anteckning än. Klicka på fraser för att börja!", height=200, key="note_area_empty")
-        if st.button("Rensa anteckning", key="clear_button"):
-            st.session_state.note = []
-            st.session_state.selected_phrases = {}
-            st.rerun()
+    # Large note area (center)
+    with col_center:
+        note_text = f"{st.session_state.current_section}:\n" + "\n".join(st.session_state.note) if st.session_state.note else "Börja med att välja fraser."
+        st.text_area("", note_text, height=500, label_visibility="collapsed")
+        col_copy, col_clear = st.columns(2)
+        with col_copy:
+            if st.button("Kopiera", use_container_width=True):
+                st.markdown(f"<script>navigator.clipboard.writeText('{note_text.replace('\\', '\\\\').replace('\'', '\\\'').replace('\n', '\\n')}')</script>", unsafe_allow_html=True)
+                st.success("Kopierad!")
+        with col_clear:
+            if st.button("Rensa", use_container_width=True):
+                st.session_state.note = []
+                st.session_state.selected_phrases = {}
+                st.rerun()
