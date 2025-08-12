@@ -56,15 +56,15 @@ if not st.session_state.logged_in:
         else:
             st.error("Fel lösenord")
 else:
-    # Custom CSS for styling
+    # Custom CSS for Apple-like styling
     st.markdown("""
     <style>
-        .stApp { background-color: #F2F2F7; max-width: 100vw; margin: 0; padding: 0; }
-        div.stButton > button:first-child { background-color: #007AFF; color: white; border-radius: 10px; border: none; font-size: 18px; min-height: 50px; }
-        div.stButton > button:first-child:hover { background-color: #0066CC; }
-        .stTextArea > div > div > textarea { background-color: white; border-radius: 10px; border: 1px solid #CED3D9; font-size: 16px; min-height: 60vh; }
+        .stApp { background-color: #F2F2F7; max-width: 100vw; margin: 0; padding: 0; overflow: hidden; }
+        .block-container { padding: 1rem 2rem; max-width: 100%; }
+        div [data-testid="baseButton-secondary"] { background-color: #007AFF; color: white; border-radius: 10px; border: none; font-size: 18px; min-height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        div [data-testid="baseButton-secondary"]:hover { background-color: #0066CC; }
+        div.stTextArea > div > div > textarea { background-color: white; border-radius: 10px; border: 1px solid #CED3D9; font-size: 16px; min-height: 70vh; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .stExpander { background-color: transparent; border: none; box-shadow: none; }
-        .selected-button { background-color: #34C759 !important; color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -99,7 +99,7 @@ else:
             st.rerun()
 
     # Main layout: phrases (left), large note (center), categories (right)
-    col_left, col_center, col_right = st.columns([2, 4, 1])
+    col_left, col_center, col_right = st.columns([2, 5, 1])
     
     # Categories (right, simple list)
     with col_right:
@@ -116,7 +116,7 @@ else:
             phrase_key = f"phrase_{phrase}"
             selected = st.session_state.selected_phrases.get(phrase, False)
             if selected:
-                st.markdown(f"<style>div.stButton > button[key='{phrase_key}'] {{ background-color: #34C759; }}</style>", unsafe_allow_html=True)
+                st.markdown(f"<style>div [data-testid=\"baseButton-secondary\"][key='{phrase_key}'] {{ background-color: #34C759; }}</style>", unsafe_allow_html=True)
             if st.button(phrase, key=phrase_key, use_container_width=True):
                 if not selected:
                     if phrase in ["Filtek Supreme XTE", "Filtek One", "Filtek Supreme"]:
