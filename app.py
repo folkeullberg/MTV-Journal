@@ -56,15 +56,16 @@ if not st.session_state.logged_in:
         else:
             st.error("Fel lösenord")
 else:
-    # Custom CSS for Apple-like styling
+    # Custom CSS for Apple-like styling and full screen no white space
     st.markdown("""
     <style>
         .stApp { background-color: #F2F2F7; max-width: 100vw; margin: 0; padding: 0; overflow: hidden; }
-        .block-container { padding: 1rem 2rem; max-width: 100%; }
+        .block-container { padding: 1rem 2rem 1rem 2rem; max-width: 100%; }
         div [data-testid="baseButton-secondary"] { background-color: #007AFF; color: white; border-radius: 10px; border: none; font-size: 18px; min-height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         div [data-testid="baseButton-secondary"]:hover { background-color: #0066CC; }
-        div.stTextArea > div > div > textarea { background-color: white; border-radius: 10px; border: 1px solid #CED3D9; font-size: 16px; min-height: 70vh; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stTextArea > div > div > textarea { background-color: white; border-radius: 10px; border: 1px solid #CED3D9; font-size: 16px; min-height: 70vh; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 10px; }
         .stExpander { background-color: transparent; border: none; box-shadow: none; }
+        .selected-button { background-color: #34C759 !important; color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
