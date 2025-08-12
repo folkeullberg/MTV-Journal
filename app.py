@@ -44,92 +44,24 @@ if "selected_phrases" not in st.session_state:
 
 # Welcoming login page
 if not st.session_state.logged_in:
-    st.markdown("<h1 style='text-align: center;'>Välkommen till MTV-JOURNAL</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; font-size: 20px;'>Snabb och enkel journalhantering för dig i sjukvården</p>", unsafe_allow_html=True)
-    password = st.text_input("", type="password", placeholder="Skriv ditt lösenord", label_visibility="collapsed")
+    st.markdown("<h1 style='text-align: center; color: #007AFF;'>Välkommen till MTV-JOURNAL</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size: 18px; color: #6E6E6E;'>Snabb journalhantering för dig i vården</p>", unsafe_allow_html=True)
+    password = st.text_input("", type="password", placeholder="Lösenord", label_visibility="collapsed")
     if st.button("Logga in", use_container_width=True):
         if password == "journal123":
             st.session_state.logged_in = True
-            st.rerun()
+            st.experimental_rerun()
         else:
-            st.error("Fel lösenord. Försök igen.")
+            st.error("Fel lösenord")
 else:
-    # Full-screen layout
-    st.markdown("<style> section[data-testid='stSidebar'] { display: none !important; } .block-container { padding: 1rem; } .main { max-width: 100vw; } </style>", unsafe_allow_html=True)
-    
-    # Minimal header with discrete buttons
-    col_left_header, col_right_header = st.columns([1, 10])
-    with col_left_header:
-        admin_expander = st.expander("⚙️", expanded=False)
-        with admin_expander:
-            admin_action = st.radio("", ["Ny kategori", "Ny fras"])
-            if admin_action == "Ny kategori":
-                new_category = st.text_input("", placeholder="Kategorinamn", label_visibility="collapsed")
-                if st.button("Lägg till"):
-                    if new_category:
-                        st.session_state.sections[new_category] = []
-                        save_data(st.session_state.sections)
-                        st.success("Tillagd!")
-                        st.rerun()
-            else:
-                category = st.selectbox("", list(st.session_state.sections.keys()), label_visibility="collapsed")
-                new_phrase = st.text_input("", placeholder="Fras", label_visibility="collapsed")
-                if st.button("Lägg till"):
-                    if new_phrase:
-                        st.session_state.sections[category].append(new_phrase)
-                        save_data(st.session_state.sections)
-                        st.success("Tillagd!")
-                        st.rerun()
-    with col_right_header:
-        if st.button("Logga ut"):
-            st.session_state.logged_in = False
-            st.session_state.note = []
-            st.session_state.selected_phrases = {}
-            st.rerun()
-
-    # Main layout: Phrases (left), large note (center), categories (right)
-    col_left, col_center, col_right = st.columns([2, 4, 1])
-    
-    # Categories (right, simple list)
-    with col_right:
-        for section in st.session_state.sections.keys():
-            if st.button(section, key=f"sec_{section}", use_container_width=True):
-                st.session_state.current_section = section
-                st.session_state.selected_phrases = {}
-                st.rerun()
-
-    # Phrases (left, large buttons with green select)
-    with col_left:
-        phrases = st.session_state.sections[st.session_state.current_section]
-        for phrase in phrases:
-            key = f"phrase_{phrase}_{uuid.uuid4()}"
-            selected = st.session_state.selected_phrases.get(phrase, False)
-            button_style = "background-color: #4CAF50; color: white;" if selected else ""
-            st.markdown(f"<style>button[kind='secondary'][key='{key}'] {{ {button_style} font-size: 18px; height: 50px; }}</style>", unsafe_allow_html=True)
-            if st.button(phrase, key=key, use_container_width=True):
-                if not selected:
-                    if phrase in ["Filtek Supreme XTE", "Filtek One", "Filtek Supreme"]:
-                        color = st.selectbox("", ["A1", "A2", "A3", "B1", "B2"], label_visibility="collapsed")
-                        st.session_state.note.append(f"{phrase}, färg {color}")
-                    else:
-                        st.session_state.note.append(phrase)
-                    st.session_state.selected_phrases[phrase] = True
-                else:
-                    st.session_state.note = [p for p in st.session_state.note if not p.startswith(phrase)]
-                    st.session_state.selected_phrases[phrase] = False
-                st.rerun()
-
-    # Large note area (center)
-    with col_center:
-        note_text = f"{st.session_state.current_section}:\n" + "\n".join(st.session_state.note) if st.session_state.note else "Börja med att välja fraser."
-        st.text_area("", note_text, height=500, label_visibility="collapsed")
-        col_copy, col_clear = st.columns(2)
-        with col_copy:
-            if st.button("Kopiera", use_container_width=True):
-                st.markdown(f"<script>navigator.clipboard.writeText('{note_text.replace('\\', '\\\\').replace('\'', '\\\'').replace('\n', '\\n')}')</script>", unsafe_allow_html=True)
-                st.success("Kopierad!")
-        with col_clear:
-            if st.button("Rensa", use_container_width=True):
-                st.session_state.note = []
-                st.session_state.selected_phrases = {}
-                st.rerun()
+    # Full-screen Apple-like design with light colors
+    st.markdown("""
+        <style>
+            .reportview-container { max-width: 100vw; padding: 0; background-color: #F2F2F7; }
+            .main { max-width: 100vw; padding: 0; }
+            button { background-color: #007AFF; color: white; font-size: 18px; height: 50px; border-radius: 10px; }
+            button:active { background-color: #0056B3; }
+            .selected-button { background-color: #34C759; color: white; }
+            .stTextArea textarea { background-color: white; border-radius: 10px; font-size: 16px; height: 60vh; }
+            .stExpander { border: none; }
+            .st
